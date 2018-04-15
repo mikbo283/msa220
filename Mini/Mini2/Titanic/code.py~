@@ -1,0 +1,53 @@
+import pandas as pd
+import numpy as np
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.dummy import DummyClassifier
+import matplotlib.pyplot as plt
+
+
+
+data = pd.read_csv('train.csv')
+data.head()
+
+Y = data.filter(['Survived'], axis=1)
+X = data.drop(['PassengerId','Survived', 'Ticket'],axis=1)
+
+
+
+categorical = X.dtypes[X.dtypes == "object"].index
+print(categorical)
+
+print X[categorical].describe()
+
+## Extract the titles from names (Mr., Mrs., Miss., etc.)
+Title = X.Name.str.split(',', expand=True)
+Title = Title[1].str.split('.', expand=True)
+Title = Title[0]
+Title = Title.replace([' the Countess', ' Dr', ' Rev',' Major',' Col', ' Mlle', ' Jonkheer', ' Ms', ' Sir', ' Don', ' Mme', ' Capt', ' Lady'],['Other','Other','Other','Other','Other','Other','Other','Other','Other','Other','Other','Other','Other'])
+Title = pd.Categorical(Title)
+X['Name'] = Title
+
+## Extract the cabin section from cabin number
+char_cabin = X["Cabin"].astype(str) # Convert data to str
+new_Cabin = np.array([cabin[0] for cabin in char_cabin]) # Take first letter
+new_Cabin[new_Cabin=='T'] = 'G'
+new_Cabin = pd.Categorical(new_Cabin)
+print new_Cabin .describe()
+X['Cabin'] = new_Cabin
+
+## Make Embarked Categorical
+
+Embarked = X.Embarked
+Embarked = Embarked.fillna(Embarked.value_counts().index[0])
+Embarked = pd.Categorical(Embarked)
+X['Embarked'] = Embarked
+
+## Make Sex Categorical
+
+Sex = X.Sex
+Sex = pd.Categorical(Sex)
+X['Sex'] = Sex
+
+## Add dummy variable to indicate missing age value
+
+X['Age_Missing'] <- 0
