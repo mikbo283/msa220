@@ -1,0 +1,528 @@
+\documentclass[11pt,twoside,swedish]{article}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage[useregional]{datetime2}
+\usepackage{fullpage}
+\usepackage{wrapfig}
+\usepackage{todonotes}
+\usepackage{multirow,array}
+\usepackage{subfiles}
+
+
+\setlength{\parskip}{0cm plus0mm minus0mm}
+
+\newcommand*{\mtodo}[1]{\todo[color=violet!50]{Mikael: #1}}
+\newcommand{\Mtodo}[1]{\todo[inline,color=violet!50]{Mikael: #1}}
+\usepackage{comment}
+
+\usepackage[natbib=true,citestyle=authoryear,backend=bibtex,useprefix]{biblatex}
+
+\addbibresource{library.bib}
+
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
+%\newtheorem{theorem}{Theorem}[section]
+%\newtheorem{lemma}[theorem]{Lemma}
+%\newtheorem{proposition}[theorem]{Proposition}
+%\newtheorem{definition}[theorem]{Definition}
+%\newtheorem{ex}{Example}[chapter]
+%\newtheorem{thm}{Theorem}[chapter]
+%\newtheorem{lem}{Lemma}[chapter]
+%\newtheorem{cor}{Corollary}[chapter]
+%\newtheorem{defn}{Definition}[chapter]
+%\newtheorem{form}{Form}[chapter]
+%\newtheorem*{Proof}{\it Proof}
+%\newcommand{\pbox}{\hspace*{1cm}\parbox{12cm}}
+
+
+\newcommand{\bx}{\hspace*{\fill}$\square$}
+
+\renewcommand{\labelitemi}{$\cdot$}
+
+%\textwidth 146 mm
+%\textheight 230 mm
+%\oddsidemargin 7mm \evensidemargin -1mm \topmargin -4mm
+
+\begin{document}
+\title{MSA220, Statistical Learning for Big Data\\
+  Final Spring 2018}
+\author{Mikael B\"o\"ors}
+
+\clearpage
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+\clearpage
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+
+\setcounter{page}{1}
+
+\section{Question 1}\label{Question 1}
+
+\subsection{Mini 1}\label{Mini 1}
+
+In order to evaluate the result of a clustering algorithm, many heuristics and
+rules of thumb have been suggested. In this mini analysis I and my
+group compared a few of these heuristics and evaluated their
+performance on different clustering algorithms and data sets.
+
+We chose to use artificial data sets for this task. The motivation for
+this choice was that in order to evaluate the performance of the
+clustering evaluation methods, we needed to know how many clusters the
+data actually contained and this can be controlled when generating
+artificial data. Also, the function we used to generate data allowed
+us to control the shapes of the clusters, their separation, the number
+of outliers and similar cluster properties. Our simulated data sets
+were designed to consist of four clusters with varying spread and
+numbers of observations. The generated data sets were two-dimensional
+since we wanted to be able to visualize the clusters and the results
+of the clustering algorithms. Also, to keep the analysis as clean as
+possible we did not include any outliers or similar impurities.
+
+The clustering algorithms we used were the EM-algorithm, K-means and
+PAM (K-medoids). K-means and PAM are very similar algorithms that both
+tries to choose n points in the data space that minimizes the sum of the
+distances to the data points closest to them. The difference between
+them is that K-means can use an arbitrary point as the cluster center,
+while PAM uses observations as the medoids. Unlike K-means and PAM,
+the EM algorithm is an model based clustering algorithm that tries to
+find model parameters for multivariate normal distributions that
+maximizes the posterior (log-) likelihood of the model. We chose to
+include a model based algorithm in order to evaluate the clustering
+evaluation methods on different types of algorithms.
+
+The clustering evaluation methods we used were the average silhouette
+score and the Dunn index. Both of these methods that can be applied to
+the result of any clustering algorithm since they do not use the model
+itself to evaluate the performance. The silhouette score for an
+observation is a score that uses the average distance to all other
+observations in the same cluster and the minimal average distance to
+all other observations in another cluster to score how similar the
+observation is to the observations in the same cluster relative to how
+similar it is to the points in another cluster. The average silhouette
+score is the average silhouette score for all observations. A high
+average silhouette score indicates that the clusters are dense and
+well separated. One can use this to determine how many clusters to
+look for by choosing the number of clusters that maximizes the average
+silhouette score. Similarly, the Dunn index is the ratio between the
+minimal distance between observations in different clusters and the maximum
+distance between observations in the same cluster. A large Dunn index
+indicates dense well separated clusters and hence one can use the
+index to choose the number of clusters that yields the largest Dunn
+index. Since the EM algorithm is a model based algorithm, one can use
+the Bayesian information criteria (BIC) to evaluate the model. The BIC
+score measures how well the model fits the data while also punishing
+complex models (i.e.\ it prefers simple models). A method to choose
+the number of clusters is to choose the number of clusters that
+minimizes the BIC score.
+
+The experiment setup was to generate data sets containing four
+clusters with different amounts of separation (-0.5, -0.4,...,0.5),
+apply the three clustering algorithms with the parameter "number of
+clusters" equal to 2,3,...,10 and register what number of clusters the
+different evaluation methods chose. This was repeated 100 times and
+the results were visualized as histograms. To provide an idea of how
+the data sets looked with different amounts of separation, examples of
+the generated data are visualized in Figure~\ref{facit}. Negative
+separation value means that the intended clusters are overlapping
+while a strictly positive separation value means that the intended
+clusters are well separated. Also note that even though the clusters
+have different spread and consist of different numbers of
+observations, they all have more or less the same shape (they are all
+more or less spherical clusters).
+
+\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/Mini_1/}}
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[scale=0.5]{Facit.png}
+\caption{Examples of generated clusters with different amounts of separation.}
+\label{facit}
+\end{center}
+\end{figure}
+
+The results of the experiments are presented as histograms in
+Appendix~\ref{Plots Mini 1}. The histograms show that for all of the
+clustering algorithms, all evaluation methods failed in finding the
+correct number of clusters when the separation value was negative,
+i.e.\ when the clusters were overlapping. This is not very
+surprising. Both K-means and PAM will have difficulties to converge to
+good cluster centers when the clusters are not well separated and the
+same is true for the EM algorithm. Therefore the bad result might be
+partly due to the failure of the clustering algorithms rather than the
+evaluation methods. However, neither the average silhouette score
+method or the Dunn index methods are designed to be used when the
+clusters are not well separated. When clusters are overlapping, the
+silhouette score will be small since the difference between the
+average within cluster distances and the minimal average distance
+between groups will be small. This makes it hard for the method to
+differ between a good and a bad clustering. We also expect the method
+to be a bit conservative when choosing the number of clusters, and
+this was confirmed in this experiment since in most of the cases with
+negative separation it chose fewer than 4 clusters. The Dunn index
+method suffers from similar problems. When clusters are overlapping,
+the Dunn ratio will be small even for a good clustering since the
+minimal between cluster distance is smaller than the maximum within
+cluster distance. Also, unlike the silhouette method, the Dunn method
+seems to prefer a larger number of clusters when the clusters are not
+well separated. This is not a surprise since when using many clusters,
+the maximal within cluster distance will be smaller while the minimal
+between clusters distance will remain about the same. The BIC
+evaluation method for the EM algorithm chose fewer than 4 clusters
+when the clusters were overlapping. Again, this is not a surprise
+since the gain in likelihood obtained with more clusters will be small
+compared to the increase in complexity.
+
+In the cases where the clusters were well separated, all combinations
+of evaluation method and clustering algorithm performed
+well. K-means in combination with the silhouette method and the Dunn
+method performed slightly worse than the other combinations. I think
+this was due to poor performance of the K-means algorithm rather than
+the evaluation methods. When I visualized the clustering, K-means had
+a tendency to split a real cluster into two, i.e.\ one ore more of
+the cluster means did not converge to a true cluster mean but rather
+converged to a point between two clusters. Since PAM uses medoids
+rather than mean points, it is more stable than K-means and did not
+suffer from this problem, which explains the difference in the result
+(at least in part). Also, the method used for generating clusters
+compliments the EM algorithm since the clusters are normally
+distributed and the EM algorithm assumes that the clusters comes from
+a collection of normal distributions. This might explain why the combination
+of the EM algorithm and the BIC method performed good when the
+separation value was zero while the other methods failed. Even though
+the EM algorithm most likely performed good when the number of
+clusters was set to four and the separation was zero, the silhouette
+method and the Dunn method were handicapped by the lack of separation,
+while BIC managed to detect the good clustering sine it uses
+likelihood rather than separation and denseness to evaluate the
+result. This brings me to the flaws of the experiment setup.
+
+The generated clusters were all ruffly spherical and both K-means and PAM are
+designed to find these types of clusters. This makes the evaluation of
+the evaluation methods a bit biased, since it is likely that the
+result would have looked different if the clusters would have had
+other shapes. Also, both the silhouette method the Dunn method were
+designed to perform good on spherical clusters. Again, this adds bias
+to the results. Another problem is the one mentioned above, namely
+that the clusters were normally distributed and therefore fits the
+model assumption of the EM algorithm perfectly. If one were to extend
+this experiment, it would probably be a good idea to use data that is
+not designed to fit the models and to use more diverge clustering
+algorithms since both K-means and PAM are very similar. Even though
+the experiment setup was biased, I still think that the  results
+illustrates the difficulty in finding the correct number of clusters.
+
+\subsection{Mini 2}\label{Mini 2}
+In this Mini analysis I compared the performance of different
+classifiers and I also investigated two ensemble methods (bagging and
+stacking) in order to see if any of them were able to improve on the
+result obtained from using single classifiers. The original task
+stated that we were supposed to compare the classifiers and ensembles
+on 2-3 different data sets. However, I was working alone on this mini
+and due to time limitations I was only able to analyse the result for
+one data set since I put a lot of effort into feature engineering in
+and pre-processing of the data. I hope that this deviation from the
+instructions is acceptable.
+
+The data I chose for this project was the Titanic data set from
+Kaggle. It consists of 891 observations were each observation contains
+information about a passenger on the Titanic. It has 12 columns, one
+of which is a binary column (Survived) that states if the passenger
+survived (1) or not (0). I chose this column to be my target column,
+i.e.\ this is a binary classification task. The remaining 11 columns
+contains information such as the sex of the passenger, his or her
+passenger class (1,2,3) and so on. Some of the categorical columns
+contained nearly as many levels as there were observations and could
+not be used without some sort of pre-processing. For example, the
+"Name" column contained the title and full name of the passenger. I
+chose to extract the title from this column and drop the name of the
+passenger since there were only a few titles in the data but every
+name was unique. I treated some of the other categorical features
+similarly (by for example extracting the ship section from the "Cabin"
+column and discarding the unique cabin number), and an overview of all
+the columns after pre-processing is presented in
+Table~\ref{titanic features}. The "Age" column was numerical, but it
+had missing values. I chose to impute the missing values with 0 and
+add a dummy variable to indicate if the value was missing or not. In
+retrospect, this was probably not the best thing to do since the
+imputed values skewed the age-distribution. It would probably have
+been better to either impute the median age or to use regression on
+the other variables to impute the age.
+
+\begin{table}
+  \begin{center}
+\begin{tabular}{ l l }
+ Feature & Type \\ 
+ \hline
+ Pclass &   Numeric: 1,2,3\\
+Title & Categories: Mr, Master, Mrs, Miss, Other\\
+Sex & Categories: Male, Female\\
+Age & Numeric\\
+SibSp & Numeric: Number of siblings/spouses\\
+Parch & Numeric: Number of parents/children\\
+Fare & Numeric: Ticket price\\
+Cabin & Categories: n, B, C, E, D, F, G, A\\
+Embarked & Categories: C, S, Q\\
+Age Missing & Dummy
+\end{tabular}
+\end{center}
+\label{titanic features}
+\end{table}
+
+I used one hot encoding to represent the categorical features when
+applying the various classifiers. For most of the classifiers, this is
+a viable representation of categorical features. However, it is not a
+good option when using logistic regression since the dummy
+coefficients will be linearly dependent and thus cannot be used for
+analysis. I did not think of this problem and if I would have tried to
+interpret which variables that were significant for the probability of
+survival it is likely that I would come to the wrong
+conclusion. However, since I only used the model for prediction my
+mistake should not affect the results.
+
+Before applying any classifiers I split the data into a train- and a
+test set. Since the original data set was small I did not want to
+sacrifice to much data for testing and therefore I used a 90/10
+split, resulting in 802 observations in the training data and 89
+observations in the test data. I would have preferred to divide the
+data into a train-, a validation- and a test set and use the
+validation set to tune the hyper parameters in the different models.
+But because of the small data set I instead chose to use 10-fold cross
+validation for this purpose. The classifiers I compared in
+this project were logistic regression, support vector classifiers
+(SVC), CART, random forest, k-nearest neighbour classifiers (KNN), gradient
+boosted classifiers (GBC), linear discriminant analysis (LDA), Naive
+Bayes (NB), a neural network with three hidden layers (NN) and
+quadratic discriminant analysis (QDA).
+
+The results of the classifiers
+are presented in Table~\ref{titanic classifiers result}. The results
+were a bit surprising since there are three groups of classifiers that
+got the exact same accuracy within the groups and there does not seem
+to be any obvious similarities between the classifiers in the
+groups. This rises the suspicion that many of the classifiers made the
+exact same mistakes. Indeed, when I analyzed the miss-classified
+observations for the different classifiers, most of them were
+identical. What is more the set of observation that were
+miss-classified by LR and SVC were a subset of the set of observations
+that were miss-classified by most of the other classifiers. The fact
+that LR and SVC (with a linear kernel) performed best indicates that there was a blurry
+linear separation between the classes since both of these methods use
+linear decision boundaries. I therefore suspect that the classes were
+almost linearly separated, meaning that the separation was not perfect
+but had some overlap. If this was the case it could explain why CART
+and RF performed slightly worse since they would try to estimate the
+linear "separation" using step functions. The same would be true for
+GBC which, similarly to RF, uses several decision trees. LDA uses a
+linear decision boundary as well. However it has in general more
+trouble with finding the optimal boundary when the classes are not
+perfectly separated than methods such as LR and SVC. NB and QDA uses
+non-linear decision boundaries and both of these performed relatively
+bad. However QDA requires more data than LDA and it is possible that
+it was impaired by the small data set in this case. NN generally
+requires a lot of training data as well in order to find a good
+decision boundary and it is also possible that the architecture I used
+was not suitable for the problem.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ l | l l l }
+ Classifier & Accuracy & P/R Survived & P/R Died \\ 
+ \hline
+ \hline
+ LR & 0.876 & 0.86/0.91 & 0.90/0.83\\
+SVC & 0.876 & 0.86/0.91 & 0.90/0.83\\
+\hline
+ CART & 0.865 & 0.84/0.91 & 0.89/0.81\\
+RF & 0.865 & 0.84/0.91 & 0.89/0.81\\
+KNN & 0.865 & 0.83/0.94 & 0.92/0.79\\
+GBC & 0.865 & 0.82/0.96 & 0.94/0.76\\
+LDA & 0.865 & 0.84/0.91 & 0.89/0.81\\
+\hline
+NB & 0.854 & 0.90/0.81 & 0.81/0.90\\
+NN & 0.843 & 0.81/0.91 & 0.89/0.76\\
+QDA & 0.820 & 0.82/0.85 & 0.82/0.79\\
+\end{tabular}
+\end{center}
+\label{titanic classifiers result}
+\end{table}
+
+In Table~\ref{titanic classifiers result} the precision and recall for
+the two classes are presented for all of the classifiers. Most of the
+classifiers seems to have less precision when predicting survivors
+than non-survivors while they have higher recall for the survivors
+than the non-survivors. This suggests that the non-survivor class had
+more spread than the survivor class. This is not very surprising since
+some of the features levels, such as Sex: Female and PClass: 1,2, are
+strong indicators of survival as can be seen in Figure~\ref{titanic
+  sex pclass} in Appendix~\ref{Plots Mini 2}. 
+
+I also tried stacking and bagging. Since the two best classifiers made
+the exact same mistakes and since the mistakes done by these
+classifiers were also made by the other classifiers, I did not expect
+staking several classifiers to improve the accuracy at all. I was
+right. I tried several different combinations of classifiers and they
+all ended up with the same accuracy as one of the single classifiers
+or a lower accuracy than the best classifiers in the
+ensemble. The idea with stacking is that the errors or biases of
+different classifiers are canceled out when using average
+voting. However if all classifiers in the ensemble makes the same
+mistakes there is nothing to gain from combining them.
+
+I had higher hopes for bagging, since it is possible that using
+slightly different training data for several classifiers of the same
+type could improve the result. However the only classifier that
+improved using bagging was CART as can be seen in Table~\ref{titanic
+  bagging}. All other classifiers got the exact same accuracy when
+bagged except for KNN which got a lower accuracy using bagging. This
+suggests that the classifiers were fairly stable and not very
+sensitive to small changes in the training data. KNN is sensitive to
+small changes in the training data when using a small neighborhood (as
+I did) and it is possible that the relatively good result obtained
+from using a single KNN was due to luck. However I did not expect CART
+to improve when bagged in this case, since CART and RF got the same
+result when using a single classifier. I had expected this CART to be
+stable, but it is clear that bagging was able to improve the result to
+that obtained from a single LR and SVC. If my suspicion that the
+classes were linearly separable except for some noise were correct, it is possible
+that the decision boundary of the CART ensemble was a finer step
+function that better approximated the linear separation.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ l | l l}
+ Classifier & Accuracy without bagging & Accuracy with bagging \\ 
+ \hline
+ CART & 0.865 & 0.876 \\
+ KNN & 0.865 & 0.854\\
+\end{tabular}
+\end{center}
+\label{titanic bagging}
+\end{table}
+
+
+
+\subsection{Mini 3}\label{Mini 3}
+\subsection{Mini 4}\label{Mini 4}
+\subsection{Mini 5}\label{Mini 5}
+
+\section{Question 2}\label{Question 2}
+
+\section{Question 3}\label{Question 3}
+
+\newpage
+\appendix
+
+\section{Plots Mini 1}\label{Plots Mini 1}
+
+\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/Mini_1/new_plots/}}
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{em_sil.png}
+\caption{Histograms showing the optimal number of clusters for the EM
+  algorithm according to the silhouette score method. The different
+  histograms shows the results for artificially generated data with 4
+  intended clusters and different separation coefficients.}
+\label{em_sil_hists}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{em_dunn.png}
+\caption{Histograms showing the optimal number of clusters for the EM
+  algorithm according to the Dunn index method. The different
+  histograms shows the results for artificially generated data with 4
+  intended clusters and different separation coefficients.}
+\label{em_dunn_hists}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{em_BIC.png}
+\caption{Histograms showing the optimal number of clusters for the EM
+  algorithm according to the BIC method. The different
+  histograms shows the results for artificially generated data with 4
+  intended clusters and different separation coefficients.}
+\label{em_BIC_hists}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{km_sil.png}
+\caption{Histograms showing the optimal number of clusters for the k-means
+  algorithm according to the silhouette score method. The different
+  histograms shows the results for artificially generated data with 4
+  intended clusters and different separation coefficients.}
+\label{km_sil_hists}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{km_dunn.png}
+\caption{Histograms showing the optimal number of clusters for the k-means
+  algorithm according to the Dunn index method. The different
+  histograms shows the results for artificially generated data with 4
+  intended clusters and different separation coefficients.}
+\label{km_dunn_hists}
+\end{center}
+\end{figure}
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{pam_sil.png}
+\caption{Histograms showing the optimal number of clusters for the PAM
+  algorithm according to the silhouette score method. The different
+  histograms shows the results for artificially generated data with 4
+  intended clusters and different separation coefficients.}
+\label{pam_sil_hists}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{pam_dunn.png}
+\caption{Histograms showing the optimal number of clusters for the PAM
+  algorithm according to the Dunn index method. The different
+  histograms shows the results for artificially generated data with 4
+  intended clusters and different separation coefficients.}
+\label{pam_dunn_hists}
+\end{center}
+\end{figure}
+
+
+\newpage
+\section{Plots Mini 2}\label{Plots Mini 2}
+
+\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini2/Titanic/}}
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{sex_class.png}
+\caption{The survival proportions for different sex/passenger class combinations.}
+\label{titanic sex pclass}
+\end{center}
+\end{figure}
+
+
+\newpage
+\printbibliography
+
+
+
+\end{document}
