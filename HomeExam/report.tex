@@ -415,6 +415,150 @@ function that better approximated the linear separation.
 
 
 \subsection{Mini 3}\label{Mini 3}
+In this mini analysis we compared different methods for dealing with
+imbalanced classes in classification problems. Imbalanced classes can
+pose a serious problem when doing classification. First of all, if the
+data is heavily imbalanced, the number of training instances will be
+small for the small class compared to the big class. This often
+entails precision problems for the smaller class, i.e.\ the algorithm
+might miss-classify observations from the smaller class more often
+than observations from the bigger classes. This can be because small
+number of training instances simply is not enough for the algorithm to
+learn to distinguish between the classes. Also the loss caused by
+miss-classifying observations from the small class can be relatively
+small compared to the loss of miss-classifying observations from the
+big classes.
+
+The data set we chose to work with was a small diabetes data set consisting of
+366 observations and 16 columns where one of the columns is a binary
+variable that states if the patients have diabetes or not and the
+remaining 15 columns contains information about the
+patients. Most of these columns are numerical but a few of them are
+categorical. The classes (sick/non-sick) were fairly imbalanced and only
+15 percent of the observations were actually sick. We split the data
+into a training and a test set containing 292 and 74 observations
+respectively. That is, the training data was very small and since only
+15 percent of the observations belonged to the sick class, there were
+only a few sick observations in the training data. Since one of the members in
+the group had worked with this data before, we knew that logistic
+regression was one of the best classification algorithms for this
+classification task. The goal with this analysis was to compare
+different methods intended to improve the result of the
+classifier. Many such methods exists, but we restricted our comparison
+to three different up- or down-sampling methods, namely naive up- and
+down-sampling and a more sophisticated up-sampling method called
+\emph{smote}.
+
+The naive up-sampling method is a method were duplicates are created
+from some of the observations from the small class. The number of
+duplicates is a hyper parameter that has to be set by the
+user. Similarly, naive down-sampling randomly deletes a chosen
+proportion of the majority class, thus balancing the data. The smote
+method is similar to naive up-sampling, but instead of creating exact
+duplicates of the observations, it uses an observations k-nearest
+neighbours to create an artificial observation similar to the
+observation and its neighbours. Since the data used for this
+experiment is small, I expected naive up-sampling and smote to perform
+a lot better than naive down-sampling. This is because down-sampling
+does not use all the data available, and one can usually not afford
+losing data when working with a small data set. 
+
+Another aspect of the imbalanced class problem is the miss-leading
+accuracy measure. If the data in a binary classification task has a
+class frequency 90/10, the baseline accuracy is 90\% and if one only
+considers the accuracy of a classifier one might be fooled into
+believing that the classifier performs well even though in reality it
+miss-classifies all observations from the smaller class. In our case,
+we knew that the baseline accuracy was about 85\%. However we chose to
+use three different performance measures to evaluate the methods,
+namely accuracy, precision and recall. The precision and recall were
+calculated with respect to the sick class. The reason for using
+precision and recall was that it provides a good insight into the
+performance of the classifier for the chosen class.
+
+The experiment setup was to adjust the proportions of the two classes
+using the different methods, train the classifier (logistic
+regression) and evaluate the accuracy, precision and recall using the
+test data. We did this for proportions of the small class ranging from
+about 15\% to 90\%. The idea was to see how the classification result
+would be affected by different levels of up- and
+down-sampling. Ideally, we should have used a validation set to find the
+best class proportions for each method before evaluating the
+classifications with these proportions on a test set. However due to
+the small data set we could not afford sacrificing data for a
+validation set and we decided to compare the overall behaviour of the
+different methods instead.
+
+In Figure~\ref{mini 3 down-sampling}, Figure~\ref{mini 3 up-sampling}
+and Figure~\ref{mini 3 smote} the results for the down-sampling,
+up-sampling and smote are presented. The results are not very
+surprising considering our small data set. For the down-sampling
+method the accuracy drops relatively fast and so does the precision
+for the sick class. However the recall increases as the proportion of
+sick observations increases (or rather as the proportion of the
+non-sick observation decreases). This means that more and more of the
+sick observations are correctly classified, but at the cost of
+lower precision, i.e.\ more and more of the non-sick observations are
+miss-classified. This was to be expected. Removing instances from the
+majority class when the training data is small will lead to more
+miss-classified observations.
+
+The results obtained from the naive up-sampling and smote are very
+similar to each other. Both of them display a similar behaviour as
+naive down-sampling, i.e.\ the accuracy and precision decreases and
+the recall increases as the proportion of the small class
+increases. However, even though the accuracy and precision decreases
+they do so at a much lower rate than before while the recall increases
+at about the same rate as for down-sampling. I expected this kind of
+behaviour from these two methods. When the algorithm gets access to
+more sick observations the loss for miss-classifying the observations
+get more relevant and this forces the algorithm to try to learn how to
+correctly classify the minor class. If the algorithm improves at this,
+the recall will increase. At the same time it can no longer get away
+with guessing "non-sick" when in doubt, and if the classes are not
+fairly well separated the more non-sick observations will be
+miss-classified. We see this as a decrease in precision. At the end of
+the day, one has to decide if it is worth sacrificing precision for
+recall. It all comes down to if it is more important to find most of
+the sick observations or if one rather have a good precision.
+
+The fact that naive up-sampling performed just as well as smote was
+not a huge surprise since they are very similar. It seems that in this
+case the algorithm did not benefit from having access to more diverse
+sick training data. I imagine that smote might be more powerful if the
+minor class contains more observations and if the minor class has more
+spread within the class (while still being fairly well separated from
+the other class). In this case, the simple naive approach worked well
+and the amount of up-sampling used must be determined based on the
+goal of the classifier. 
+
+\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/Mini_3/}}
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{LRDownsampling.png}
+\caption{The accuracy, precision and recall at different amounts of down-sampling.}
+\label{mini 3 down-sampling}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{LRUpsample.png}
+\caption{The accuracy, precision and recall at different amounts of up-sampling.}
+\label{mini 3 up-sampling}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{LRSmote.png}
+\caption{The accuracy, precision and recall at different amounts of
+  SMOTE up-sampling.}
+\label{mini 3 smote}
+\end{center}
+\end{figure}
+
+
 \subsection{Mini 4}\label{Mini 4}
 \subsection{Mini 5}\label{Mini 5}
 
