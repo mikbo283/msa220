@@ -15,6 +15,7 @@
 \usepackage{todonotes}
 \usepackage{multirow,array}
 \usepackage{subfiles}
+\usepackage{xcolor,colortbl}
 
 
 \setlength{\parskip}{0cm plus0mm minus0mm}
@@ -224,6 +225,7 @@ algorithms since both K-means and PAM are very similar. Even though
 the experiment setup was biased, I still think that the  results
 illustrates the difficulty in finding the correct number of clusters.
 
+\newpage
 \subsection{Mini 2}\label{Mini 2}
 In this Mini analysis I compared the performance of different
 classifiers and I also investigated two ensemble methods (bagging and
@@ -413,7 +415,7 @@ function that better approximated the linear separation.
 \end{table}
 
 
-
+\newpage
 \subsection{Mini 3}\label{Mini 3}
 In this mini analysis we compared different methods for dealing with
 imbalanced classes in classification problems. Imbalanced classes can
@@ -533,7 +535,7 @@ and the amount of up-sampling used must be determined based on the
 goal of the classifier. 
 
 \graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/Mini_3/}}
-\begin{figure}
+\begin{figure}[!htb]
 \begin{center}
 \includegraphics[scale=0.5]{LRDownsampling.png}
 \caption{The accuracy, precision and recall at different amounts of down-sampling.}
@@ -541,7 +543,7 @@ goal of the classifier.
 \end{center}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[!htb]
 \begin{center}
 \includegraphics[scale=0.5]{LRUpsample.png}
 \caption{The accuracy, precision and recall at different amounts of up-sampling.}
@@ -549,7 +551,7 @@ goal of the classifier.
 \end{center}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[!ht]
 \begin{center}
 \includegraphics[scale=0.5]{LRSmote.png}
 \caption{The accuracy, precision and recall at different amounts of
@@ -558,8 +560,140 @@ goal of the classifier.
 \end{center}
 \end{figure}
 
-
+\newpage
 \subsection{Mini 4}\label{Mini 4}
+
+In this mini analysis we compared different methods for combining
+clustering with different dimension reduction techniques. Clustering
+algorithms use distances between observations to group similar
+observations into clusters. When the number of dimensions grows larger,
+the meaning of distances between observations begins to break down
+(the curse of dimensionality). To work around the problem, different
+methods can be utilized to reduce the dimensions before applying a
+clustering algorithm. In this analysis we compared different
+combinations of dimension reduction techniques and clustering
+algorithms.
+
+The data we used was a cancer data set with 801 observations and 20265
+features. The features contained information about different genes and
+the intended target variable was a categorical variable with 5
+different cancer types. Since we were interested in clustering rather
+than classification, we only used the cancer variable to evaluate the
+clusters, i.e.\ we hoped that the clusters would represent different
+types of cancer. However clustering is unsupervised and there were no
+guarantees that the clusters would have any connection to cancer
+types.
+
+Before applying any dimension reduction techniques we tried to use
+k-means and PAM on the original data. Applied the two algorithms with
+different numbers of clusters and chose the number of clusters that
+maximized the average silhouette score. The results are presented in
+Appendix~\ref{Plots Mini 4}. In both cases the average silhouette
+score suggested that we should use 6 clusters. However, there were
+only 5 types of cancer and when looking at the clustering results with
+6 clusters one of the cancer types were split into two clusters. Since
+the average silhouette score for 5 and 6 clusters were similar, we
+decided to use 5 clusters in order to be able to compare the results
+more easily. Confusion matrices of the clusterings can be found in
+Appendix~\ref{Plots Mini 4}. The results were surprising. Due to the
+high dimensionality we did not expect k-means and PAM to perform as
+well as they did. The fact they basically identified the cancer groups
+perfectly in over 20 000 dimensions suggests that the groups were very
+well separated in the original data space. Also, k-means and PAM are
+designed to find spherical clusters, so their good result might
+indicate that the clusters were multi-dimensional spheres. I have a
+vague suspicion that the data were pre-processed. Maybe the data were
+scaled within each cancer group, thus separating the clusters. In any
+case, we continued with our analysis.
+
+We tried two different dimension reduction techniques, PCA and
+SOM. The reason for why we chose these particular because we wanted to
+try both a global and a local method. In Figure~\ref{mini 4 pca} in
+Appendix~\ref{Plots Mini 4} the explained variance for different
+numbers of PCA variables is presented as well as the intended clusters
+in the first three PCA variables. It is clear that the clusters are
+fairly well separated in three dimensions and the elbow of the
+explained variance-plot suggests that most of the variance is
+explained using 100 PCA variables. Therefore, we reduced the data to
+100 dimensions using PCA before using k-means and PAM. The results are
+presented in Appendix~\ref{Plots Mini 4}. Both of the algorithms
+performed well, meaning that the separation was more or less preserved
+in a lower dimension. However, even though their results were good
+they were not as good as they were when applied to the original data
+set. A summary of the "accuracy" is presented in Table~\ref{mini 4
+  summary} and it is clear that some of the separation was lost when
+using PCA.
+
+We also used a method called \emph{HDDC} (high dimensional data
+clustering) which assumes that the clusters live in a subspace of the
+data. It uses a k-means initialized EM-algorithm, i.e.\ it is a model
+based approach. The idea is to find parameters of multivariate normal
+distributions that fits the data in a subspace. This algorithm was
+very slow and we were not able to run it on the original data
+set. Instead we applied it to the PCA transformed data. This was
+probably not optimal since even if the clusters lived in a subspace of
+the original data there is no guarantee that they would do so in the
+PCA transformed data. The results was not very impressive as
+Table~\ref{mini 4 summary} suggests. Also, it only found two clusters
+in the data where one of the clusters consisted of one of the cancer
+types while the other cluster consisted of the remaining four
+types. Either some of the information was lost when applying PCA or
+the method was simply not appropriate for our data. It could also be
+that the hyper parameters we used were sub-optimal.
+
+When we used SOM to reduce the dimensions of the data, we used 64
+(8$\times$8) nodes meaning that the reduction was fairly local. We
+clustered the result from SOM using k-means, PAM and hierarchical
+clustering. The results are presented in Table~\ref{mini 4
+  summary}. Hierarchical clustering was clearly the best clustering
+method out of the three and in Figure~\ref{mini 4 som} the clustering
+of the SOM-map is presented. However the most interesting result is
+that both k-means and PAM performed worse in combination with SOM
+than they did in combination with PCA while hierarchical clustering
+performed almost as good as k-means did on the original data. This
+means that both the local and the global dimension reduction
+techniques worked well in combination with different clustering
+algorithms. Which combination to use is most likely case sensitive and
+it is hard to draw any general conclusions from these results.
+
+We also tried a subspace clustering method called
+\emph{proclus}. Proclus is a method that works under the assumption
+that the clusters live in a subspace of the data. It tries to find
+these clusters by using medoids to find good cluster centers. It then
+looks at the within cluster distances as a function of features and
+tries to find the subspace in which the clusters live. The result is
+presented in Appendix~\ref{Plots Mini 4}, and it was far from
+impressing when viewed in relation to the other methods. However, the
+algorithm was very slow, and there were a few hyper parameters to
+tune. Due to time limitations we were not able to perform a grid
+search to find the optimal parameters so the result might be
+sub-optimal.  
+
+\begin{table}[]
+\centering
+\scalebox{0.8}{
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+Dimension reduction/Method & kmeans & PAM    & hclust & EM     & ProClus \\ \hline
+Original Data              & \cellcolor{green!80}99.3\% & 98.5\% & -      & -      & \cellcolor{red!80}72.7\%  \\ \hline
+SOM                        & 87.5\% & 88.8\% & 99.1\% & -      & -       \\ \hline
+PCA                        & 92.1\% & 90.8\% & -      & 93.8\% & -       \\ \hline
+\end{tabular}
+}
+\label{mini 4 summary}
+\caption{Summary of results}
+\end{table}
+
+The most surprising result from this mini analysis was that the best
+clustering was obtained from applying k-means on the original data. I
+did not expect this at all since k-means should be bad when the number
+of dimensions is 20 000 due to the the curse of dimensionality. The
+fact that it performed so well makes me suspicious that the data had
+been pre-processed in some manner so that the cancer types were
+very well separated and dense. This is just speculations though and
+the main lesson from this analysis is that one has to try different
+methods to find the one that is suitable for the data.
+
 \subsection{Mini 5}\label{Mini 5}
 
 \section{Question 2}\label{Question 2}
@@ -572,7 +706,7 @@ goal of the classifier.
 \section{Plots Mini 1}\label{Plots Mini 1}
 
 \graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/Mini_1/new_plots/}}
-\begin{figure}
+\begin{figure}[!htb]
 \begin{center}
 \includegraphics[scale=0.5]{em_sil.png}
 \caption{Histograms showing the optimal number of clusters for the EM
@@ -655,7 +789,7 @@ goal of the classifier.
 \section{Plots Mini 2}\label{Plots Mini 2}
 
 \graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini2/Titanic/}}
-\begin{figure}
+\begin{figure}[!htb]
 \begin{center}
 \includegraphics[scale=0.5]{sex_class.png}
 \caption{The survival proportions for different sex/passenger class combinations.}
@@ -663,6 +797,132 @@ goal of the classifier.
 \end{center}
 \end{figure}
 
+\newpage
+
+\section{Plots Mini 4}\label{Plots Mini 4}
+
+\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/mini_big/TCGA-PANCAN-HiSeq-801x20531/}}
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=7cm]{O-KM-Silhouette.png}
+\caption{The average silhouette scores for different numbers of
+  clusters (K-means, Original)}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\resizebox{0.4\textwidth}{!}{%
+\begin{tabular}{rrrrrr}
+  \hline
+ & BRCA & COAD & KIRC & LUAD & PRAD \\ 
+  \hline
+1 &   0 &   0 & 145 &   0 &   0 \\ 
+  2 &   0 &   0 &   0 &   0 & 136 \\ 
+  3 &   1 &   2 &   0 & 139 &   0 \\ 
+  4 & 299 &   0 &   1 &   2 &   0 \\ 
+  5 &   0 &  76 &   0 &   0 &   0 \\ 
+   \hline
+\end{tabular}
+}
+\caption{The result of k-means clustering on the original data.}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[width=7cm]{O-PAM-Silhouette.png}
+\caption{The average silhouette scores for different numbers of
+  clusters (PAM, Original)}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\resizebox{0.4\textwidth}{!}{%
+\begin{tabular}{rrrrrr}
+  \hline
+ & BRCA & COAD & KIRC & LUAD & PRAD \\ 
+  \hline
+1 &   0 &   0 &   0 &   0 & 136 \\ 
+  2 &   9 &   0 &   0 & 139 &   0 \\ 
+  3 & 291 &   0 &   1 &   2 &   0 \\ 
+  4 &   0 &   0 & 145 &   0 &   0 \\ 
+  5 &   0 &  78 &   0 &   0 &   0 \\ 
+   \hline
+\end{tabular}
+}
+\caption{The result of PAM clustering on the original data.}
+\end{table}
+
+\begin{figure}
+\centering
+\begin{minipage}{0.45\textwidth}
+\includegraphics[width=\textwidth]{PCA-Variance.png}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\includegraphics[width=\textwidth]{PCA-3D.png}
+\end{minipage}
+\label{mini 4 pca}
+\caption{Left: Explained variance for the different PCA
+  variables. Right: The intended clusters in the first 3 PCA dimensions.}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=7cm]{PCA-KM-SW.png}
+\caption{The average silhouette scores for different numbers of
+  clusters (K-means, PCA)}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\resizebox{0.4\textwidth}{!}{%
+\begin{tabular}{rrrrrr}
+  \hline
+ & BRCA & COAD & KIRC & LUAD & PRAD \\ 
+  \hline
+1 &  53 &   5 &   1 & 139 &   1 \\ 
+  2 &   0 &   0 &   0 &   0 & 134 \\ 
+  3 &   0 &   0 & 145 &   0 &   0 \\ 
+  4 & 247 &   0 &   0 &   2 &   1 \\ 
+  5 &   0 &  73 &   0 &   0 &   0 \\ 
+   \hline
+\end{tabular}
+}
+\caption{The result of k-means clustering on the PCA data.}
+\end{table}
+
+
+\begin{figure}
+\centering
+\includegraphics[width=7cm]{PCA-PAM-SW.png}
+\caption{The average silhouette scores for different numbers of
+  clusters (PAM, PCA)}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\resizebox{0.4\textwidth}{!}{%
+\begin{tabular}{rrrrrr}
+  \hline
+ & BRCA & COAD & KIRC & LUAD & PRAD \\ 
+  \hline
+1 &   5 &   0 &   0 &   0 & 133 \\ 
+  2 &  51 &   4 &   7 & 138 &   0 \\ 
+  3 & 244 &   1 &   0 &   2 &   3 \\ 
+  4 &   0 &   0 & 139 &   0 &   0 \\ 
+  5 &   0 &  73 &   0 &   1 &   0 \\ 
+   \hline
+\end{tabular}
+}
+\caption{The result of PAM clustering on the PCA data.}
+\end{table}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[scale=0.5]{sommap.jpeg}
+\caption{The result of hierarchical clustering on the SOM-data.}
+\label{mini 4 som}
+\end{center}
+\end{figure}
 
 \newpage
 \printbibliography
