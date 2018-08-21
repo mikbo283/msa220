@@ -696,6 +696,140 @@ methods to find the one that is suitable for the data.
 
 \subsection{Mini 5}\label{Mini 5}
 
+In this mini analysis I worked in a group of three people. We worked
+independently of each other and it seems like each of us were
+investigating methods developed for different purposes. I will only
+analyse my work and my approach here since it is not very meaningful
+to compare methods that does not have the same goals.
+
+I was analyzing the performance of an online classification method
+called \emph{Adaptive-Size Hoeffding Tree} (ASHT), implemented in the
+MOA package as the class \emph{OzaBagASHT}. The goal of online
+classification is to train a classifier on a stream of data rather
+than a data set, meaning that the classifier does not have access to
+the full data set at ones. Instead, the training data comes as a
+stream of data (or in chunks) and the classifier is only allowed to
+see the data once, i.e.\ it cannot store the data it has already
+seen. This is because there are many situations where storing massive
+streams of data is simply not practically feasible. Also, the
+classifier should be ready classify a new observation at any time,
+allowing the training process to go on continuously while still being
+ready to be used.
+
+Another important aspect of data streams is that they
+can change over time (concept drift), meaning that some aspect of the target variable
+can change between different windows of the stream. Not all online
+classification methods are designed to be able to handle concept
+drift. ASHT is a method that can be used when concept drift is present
+and the data I used for this analysis has a lot of drift. The data is
+a electricity price data stream from Australia. The target column is a
+binary column that states if the electricity price went up or down at
+a specific point in time. It also contains 8 numeric features that I
+used as training data.
+
+A Hoeffding tree is basically a decision tree that grows larger and
+larger as it observes more and more data. It uses the Hoeffding bound
+to calculate how many observations it has to observe before making a
+new split that satisfies the expected accuracy demands. The
+ASHT method basically use an ensemble of such trees of different
+sizes. The trees has a maximum allowed depth and when this depth is
+reached the tree will start over from zero. The idea is that the
+smaller trees in the ensemble will adapt quickly to drifts in the data
+stream and that the bigger trees will be more stable and accurate over
+time. The maximum depth limit is to ensure that the model adapts well
+to concept drift since it will forget what it has learned after a
+while. OzaBagASHT is an implementation of this method that is designed
+to increase the diversity between the trees (using boosting) in order
+to ensure a more stable classifier.
+
+The experiment setup was to convert the data set into a data stream
+that was fed into the classifier for training. At regular points
+in the stream the classifier was tested on a test data set consisting
+of the consecutive x observations in the stream. There were two
+hyper-parameter to tune, namely the ensemble size and the depth of the
+smallest tree in the ensemble. This was done manually in a pseudo-grid
+search manner. The reason for why only the maximum depth of the
+smallest tree has to be set is because the algorithm defines the
+maximum depth of the other trees as $2s,~4s,..$ where $s$ is the
+maximum depth of the smallest tree.
+
+In order to visualize the concept drift in the stream I encoded the
+"down" labels as -1 and the up variable as 1 and used a symmetric sliding window
+of size 1312 to calculate the the mean y-value in each point. The
+result is presented in Figure~\ref{mini 5 sliding window}. It is clear
+from the figure that there is a lot of drift in this data and that it
+changes quite fast. Also, the total sum is negative meaning that
+there are more "Down" observations than "Up" observations.
+
+\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/Mini_5/}}
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[scale=0.5]{sliding_window.png}
+\caption{The result of a sliding average over the target
+  variable. "Down" was encoded as -1 and "Up" was encoded as 1.}
+\label{mini 5 sliding window}
+\end{center}
+\end{figure}
+
+The baseline accuracy for the data, i.e.\ the accuracy obtained from
+only guessing "Down", is about 0.57, so any result above that is a
+success. In the experiment I trained the classifier using 10 000
+observation before testing it on the consecutive 500 and 10 000
+observations. I then continued the training on the next 10 000
+observations (including the ones which had been used for testing) and
+tested again and so on. I was careful not to reset the classifier
+after the testing sessions. I did this to simulate a continuous
+training stream with regular testing sessions to keep track on the
+performance. The results ate visualized in Figure~\ref{mini 5 result}.
+
+\begin{figure}[!h]
+\begin{minipage}{0.45\textwidth}
+\includegraphics[width = \textwidth]{Pred_500.png}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\includegraphics[width = \textwidth]{Pred_10K.png}
+\end{minipage}
+\label{mini 5 result}
+\caption{\textbf{Left:} Train Size = 10 000, Test Size = 500,
+  \textbf{Right:} Train Size = 10 000, Test Size = 10 000}
+\end{figure}
+
+The average accuracy was slightly higher in the experiment where I
+used smaller test sets. This can of course be because data in these
+test sets was easier to classify, but I am more inclined to think that the
+difference was due to concept drift. As the figures suggests, the
+class proportions changes rapidly and it is likely that the
+classification  of observations was more accurate when the observation
+came from a point in time close to the training window. Also, the
+accuracy varied more between the test sets in the first experiments
+than the latter. I suspect that the accuracy was more stable in the
+second experiment because the trend changes in the data were average
+out by the large training window.
+
+I also tried using deeper trees. In the experiments above the maximum
+depth of the first tree had depth 1. This means that the classifier
+was set to adapt rapidly to changes in the data. Deeper first trees
+lead to lower accuracy, meaning that the fast adaptation was needed
+for this data. This is of course very data dependent and if the data
+would have less drift it is likely that a classifier with deeper trees
+would have been preferable. However, I used 10 trees in this ensemble
+and this means that the largest tree were allowed to grow quite deep
+(depth 512 if I understand the documentation correctly). It seems that
+this was needed to obtain the optimal accuracy and it suggests that
+even though the data changes quickly, the algorithm still benefited
+from a long memory.
+
+The take home message from this mini is that it is far from trivial to
+build a good classifier with data that changes quickly. The ASHT
+method is very intuitive and the fact that it did better on the
+smaller testing sets on average indicates that even with data that
+changes rapidly it still does a decent job at adapting to the
+changes. However for this type of data I think that one can benefit
+from methods developed specifically for fast changing data.  
+
+
+
+
 \section{Question 2}\label{Question 2}
 
 \section{Question 3}\label{Question 3}
@@ -788,7 +922,7 @@ methods to find the one that is suitable for the data.
 \newpage
 \section{Plots Mini 2}\label{Plots Mini 2}
 
-\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini2/Titanic/}}
+\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/Mini_2/Titanic/}}
 \begin{figure}[!htb]
 \begin{center}
 \includegraphics[scale=0.5]{sex_class.png}
@@ -801,7 +935,7 @@ methods to find the one that is suitable for the data.
 
 \section{Plots Mini 4}\label{Plots Mini 4}
 
-\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/mini_big/TCGA-PANCAN-HiSeq-801x20531/}}
+\graphicspath{{/home/mikael/Repos/Courses/msa220/Mini/Mini/Mini_4/TCGA-PANCAN-HiSeq-801x20531/}}
 \begin{figure}[!htb]
 \centering
 \includegraphics[width=7cm]{O-KM-Silhouette.png}
